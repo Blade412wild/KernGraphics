@@ -1,0 +1,4 @@
+﻿  glad.c
+  Main.cpp
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(44,40): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+  OpenGL.vcxproj -> C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.exe
