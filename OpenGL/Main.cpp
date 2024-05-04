@@ -90,21 +90,97 @@ int init(GLFWwindow*& window) {
 }
 
 void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
+	//float vertices[] = {
+	//	// position				//color
+	//	-0.5, -0.5, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+	//	0.5, -0.5, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+	//	-0.5, 0.5, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+	//	0.5, 0.5, 0.0f,			1.0f, 1.0f, 1.0f, 1.0f,
+	//};
+
 	float vertices[] = {
-		// position				//color
-		-0.5, -0.5, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
-		0.5, -0.5, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
-		-0.5, 0.5, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-		0.5, 0.5, 0.0f,			1.0f, 1.0f, 1.0f, 1.0f,
+		// position				//color					//Tex coords		//normals
+		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			0.0, -1.0f, 0.0f,
+		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			0.0, -1.0f, 0.0f,
+		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			0.0, -1.0f, 0.0f,
+		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			0.0, -1.0f, 0.0f,
+
+		// 1
+		0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			1.0, 0.0f, 0.0f,
+		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			1.0, 0.0f, 0.0f,
+
+		// 2
+		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			0.0, 0.0f, 1.0f,
+		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			0.0, 0.0f, 1.0f,
+
+		// 3
+		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		-1.0f, 1.0f,		-1.0, 0.0f, 0.0f,
+		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		-1.0f, 0.0f,		-1.0, 0.0f, 0.0f,
+
+		// 4
+		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, -1.0f,			0.0, 0.0f, -1.0f,
+		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		1.0f, -1.0f,			0.0, 0.0f, -1.0f,
+
+		// 5
+		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		3.0f, 0.0f,			0.0, 1.0f, 0.0f,
+		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		3.0f, 1.0f,			0.0, 1.0f, 0.0f,
+
+		// 6
+		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			0.0, 0.0f, 1.0f,
+		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			0.0, 0.0f, 1.0f,
+
+		// 7
+		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			-1.0, 0.0f, 0.0f,
+		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			-1.0, 0.0f, 0.0f,
+
+		// 8
+		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			0.0, 0.0f, -1.0f,
+		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			0.0, 0.0f, -1.0f,
+
+		// 9
+		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			1.0, 0.0f, 0.0f,
+		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			1.0, 0.0f, 0.0f,
+
+		// 10
+		0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			0.0, 1.0f, 0.0f,
+		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			0.0, 1.0f, 0.0f,
+
 	};
+
+	//int indices[] = {
+	//	0, 1, 2,
+	//	2, 1, 3
+	//};
 
 	int indices[] = {
+		// down
 		0, 1, 2,
-		2, 1, 3
+		0, 2, 3,
+
+		// back
+		14, 6, 7,
+		14, 7, 15,
+
+		//right
+		20, 4, 5,
+		20, 5, 21,
+
+		//left
+		16, 8, 9,
+		16, 9, 17,
+
+		//front
+		18, 10, 11,
+		18, 11, 19,
+
+		//up
+		22, 12, 03,
+		22, 13, 23,
+
 	};
 
 
-	int stride = (3 + 4) * sizeof(float);
+	int stride = (3 + 3 + 2 + 3) * sizeof(float);
 	size = sizeof(vertices) / stride;
 	numbIndices = sizeof(indices) / sizeof(int);
 
@@ -128,7 +204,7 @@ void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*) (3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 }
 
