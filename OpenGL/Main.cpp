@@ -6,7 +6,8 @@
 // forward Declarations
 int init(GLFWwindow*& window);
 void createTriangle(GLuint& vao, int& size);
-void createShaders();
+void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
+	void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
 
 
@@ -23,10 +24,11 @@ int main()
 	int res = init(window);
 	if (res != 0) return res;
 
-	GLuint triangleVAO;
-	int triangleSize;
+	GLuint triangleVAO, triangleEBO;
+	int triangleSize, triangleIndexCount;
 
-	createTriangle(triangleVAO, triangleSize);
+	createSquare(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
+	//createTriangle(triangleVAO, triangleSize);
 	createShaders();
 
 	// Create Viewport
@@ -37,7 +39,6 @@ int main()
 		// input handling (TODO)
 
 		//rendering
-		// background color set & render!
 		glClearColor(0.2, 0.3, 0.3, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -45,6 +46,7 @@ int main()
 
 		glBindVertexArray(triangleVAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+		glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 
@@ -93,8 +95,7 @@ void createTriangle(GLuint& vao, int& size) {
 	float vertices[] = {
 		-0.5, -0.5, 0.0f,
 		0.5, -0.5, 0.0f,
-		0.0, 0.5, 0.0f,
-
+		0.5, 0.5, 0.0f,
 	};
 
 
@@ -109,6 +110,45 @@ void createTriangle(GLuint& vao, int& size) {
 	glEnableVertexAttribArray(0);
 
 	size = sizeof(vertices);
+}
+
+void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
+	float vertices[] = {
+		-0.5, -0.5, 0.0f,
+		0.5, -0.5, 0.0f,
+		-0.5, 0.5, 0.0f,
+		0.5, 0.5, 0.0f,
+	};
+
+	int indices[] = {
+		0, 1, 2,
+		2, 1, 3
+	};
+
+
+	int stride = 3 * sizeof(float);
+	size = sizeof(vertices) / stride;
+	numbIndices = sizeof(indices) / sizeof(int);
+
+	// create te VAO
+	glGenVertexArrays(1, &vao);
+	//Bind it to create its configuration
+	glBindVertexArray(vao);
+
+	// create buffer, bind it & assign vertices to it
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	
+
+	// set layout of vertex data
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 void createShaders() {
