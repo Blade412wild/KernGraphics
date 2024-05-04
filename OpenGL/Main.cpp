@@ -5,9 +5,8 @@
 
 // forward Declarations
 int init(GLFWwindow*& window);
-void createTriangle(GLuint& vao, int& size);
-void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
-	void createShaders();
+void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
+void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
 
 
@@ -27,8 +26,7 @@ int main()
 	GLuint triangleVAO, triangleEBO;
 	int triangleSize, triangleIndexCount;
 
-	createSquare(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
-	//createTriangle(triangleVAO, triangleSize);
+	CreateTriangle(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
 	createShaders();
 
 	// Create Viewport
@@ -91,33 +89,13 @@ int init(GLFWwindow*& window) {
 	return 0;
 }
 
-void createTriangle(GLuint& vao, int& size) {
+void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	float vertices[] = {
-		-0.5, -0.5, 0.0f,
-		0.5, -0.5, 0.0f,
-		0.5, 0.5, 0.0f,
-	};
-
-
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	size = sizeof(vertices);
-}
-
-void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
-	float vertices[] = {
-		-0.5, -0.5, 0.0f,
-		0.5, -0.5, 0.0f,
-		-0.5, 0.5, 0.0f,
-		0.5, 0.5, 0.0f,
+		// position				//color
+		-0.5, -0.5, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
+		0.5, -0.5, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5, 0.5, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
+		0.5, 0.5, 0.0f,			1.0f, 1.0f, 1.0f, 1.0f,
 	};
 
 	int indices[] = {
@@ -126,7 +104,7 @@ void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	};
 
 
-	int stride = 3 * sizeof(float);
+	int stride = (3 + 4) * sizeof(float);
 	size = sizeof(vertices) / stride;
 	numbIndices = sizeof(indices) / sizeof(int);
 
@@ -144,11 +122,14 @@ void createSquare(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	
+
 
 	// set layout of vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*) (3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 }
 
 void createShaders() {

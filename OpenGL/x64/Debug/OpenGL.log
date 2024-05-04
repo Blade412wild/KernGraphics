@@ -1,4 +1,4 @@
 ﻿  Main.cpp
 C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(42,34): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(219,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(223,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
   OpenGL.vcxproj -> C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.exe
