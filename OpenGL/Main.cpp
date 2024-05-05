@@ -41,7 +41,14 @@ int main()
 
 	CreateGeometry(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
 
-	GLuint boxTex = loadTexture("textures/container2.png");
+	GLuint boxTex = loadTexture("textures/container2.png");	
+	GLuint boxNormal = loadTexture("textures/container2_normal.png");
+
+	//set texture channels
+	glUseProgram(simpleProgram);
+	glUniform1i(glGetUniformLocation(simpleProgram, "mainTex"), 0);
+	glUniform1i(glGetUniformLocation(simpleProgram, "normalTex"), 1);
+
 	// Create Viewport
 	glViewport(0, 0, WIDTH, HEIGHT);
 
@@ -75,6 +82,9 @@ int main()
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, boxTex);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, boxNormal);
+
 
 		glBindVertexArray(triangleVAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
@@ -123,43 +133,44 @@ int init(GLFWwindow*& window) {
 }
 
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
-	float vertices[] = {
-		// positions            //colors            // tex coords   // normals
-		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
-		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
-		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
-		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
+	
+		float vertices[] = {
+			// positions            //colors            // tex coords   // normals          //tangents      //bitangents
+			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
 
-		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       1.f, 0.f, 0.f,
-		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       1.f, 0.f, 0.f,
+			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
 
-		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 2.f,       0.f, 0.f, 1.f,
-		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 2.f,       0.f, 0.f, 1.f,
+			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
 
-		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   -1.f, 1.f,      -1.f, 0.f, 0.f,
-		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   -1.f, 0.f,      -1.f, 0.f, 0.f,
+			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
 
-		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, -1.f,      0.f, 0.f, -1.f,
-		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, -1.f,      0.f, 0.f, -1.f,
+			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
 
-		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   3.f, 0.f,       0.f, 1.f, 0.f,
-		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   3.f, 1.f,       0.f, 1.f, 0.f,
+			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
 
-		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,
+			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
 
-		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       -1.f, 0.f, 0.f,
-		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       -1.f, 0.f, 0.f,
+			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
 
-		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,
-		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,
+			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
 
-		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,
-		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,
+			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
 
-		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       0.f, 1.f, 0.f,
-		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       0.f, 1.f, 0.f
-	};
+			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f
+		};
 
 	unsigned int indices[] = {  // note that we start from 0!
 		// DOWN
@@ -183,7 +194,7 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	};
 
 
-	int stride = (3 + 3 + 2 + 3) * sizeof(float);
+	int stride = (3 + 3 + 2 + 3 + 3 + 3) * sizeof(float);
 	size = sizeof(vertices) / stride;
 	numbIndices = sizeof(indices) / sizeof(int);
 
@@ -213,123 +224,129 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_TRUE, stride, (void*)(8 * sizeof(float))); 
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_TRUE, stride, (void*)(8 * sizeof(float)));
 	glEnableVertexAttribArray(3);
-}
 
-void createShaders() {
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_TRUE, stride, (void*)(11 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 
-	createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
-}
-
-void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
-	//create a GL Program with a Vertex & Fragment Shader
-
-	char* vertexScr;
-	char* fragmentScr;
-	loadFile(vertex, vertexScr);
-	loadFile(fragment, fragmentScr);
-
-	GLuint vertexShaderID, fragmentShaderID;
-
-	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShaderID, 1, &vertexScr, nullptr);
-	glCompileShader(vertexShaderID);
-
-	int succes;
-	char infoLog[512];
-	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &succes);
-	if (!succes) {
-		glGetShaderInfoLog(vertexShaderID, 512, nullptr, infoLog);
-		std::cout << "ERROR COMPILING VERTEX SHADER \n " << infoLog << std::endl;
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_TRUE, stride, (void*)(14 * sizeof(float)));
+	glEnableVertexAttribArray(5);
 	}
 
-	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShaderID, 1, &fragmentScr, nullptr);
-	glCompileShader(fragmentShaderID);
+		void createShaders() {
 
-	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &succes);
-	if (!succes) {
-		glGetShaderInfoLog(fragmentShaderID, 512, nullptr, infoLog);
-		std::cout << "ERROR COMPILING Fragment SHADER \n " << infoLog << std::endl;
+		createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
 	}
 
-	programID = glCreateProgram();
-	glAttachShader(programID, vertexShaderID);
-	glAttachShader(programID, fragmentShaderID);
-	glLinkProgram(programID);
+	void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
+		//create a GL Program with a Vertex & Fragment Shader
 
-	glGetProgramiv(programID, GL_LINK_STATUS, &succes);
-	if (!succes) {
-		glGetProgramInfoLog(programID, 512, nullptr, infoLog);
-		std::cout << "ERROR LINKING PRORGAM \n " << infoLog << std::endl;
-	}
+		char* vertexScr;
+		char* fragmentScr;
+		loadFile(vertex, vertexScr);
+		loadFile(fragment, fragmentScr);
 
-	glDeleteShader(vertexShaderID);
-	glDeleteShader(fragmentShaderID);
+		GLuint vertexShaderID, fragmentShaderID;
 
-	delete vertexScr;
-	delete fragmentScr;
+		vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertexShaderID, 1, &vertexScr, nullptr);
+		glCompileShader(vertexShaderID);
 
-}
-
-void loadFile(const char* filename, char*& output) {
-
-	//open file stream
-	std::ifstream file(filename, std::ios::binary);
-
-	//if the file was succesfully opened
-	if (file.is_open()) {
-		//get lenght of file
-		file.seekg(0, file.end);
-		int lenght = file.tellg();
-		file.seekg(0, file.beg);
-
-		//allocate memory for the char pointer
-		output = new char[lenght + 1];
-
-		// read datat as a block
-		file.read(output, lenght);
-
-		//add null terminator rto end of char pointer
-		output[lenght] = '\0';
-
-		// close the file
-		file.close();
-	}
-	else {
-		// if the file failed to open, set the chart pointer to NULL
-		output = NULL;
-	}
-}
-
-GLuint loadTexture(const char* path) {
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, numChannel;
-
-	unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
-
-	if (data) {
-		if (numChannel == 3) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		int succes;
+		char infoLog[512];
+		glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &succes);
+		if (!succes) {
+			glGetShaderInfoLog(vertexShaderID, 512, nullptr, infoLog);
+			std::cout << "ERROR COMPILING VERTEX SHADER \n " << infoLog << std::endl;
 		}
-		else if (numChannel == 4) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragmentShaderID, 1, &fragmentScr, nullptr);
+		glCompileShader(fragmentShaderID);
+
+		glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &succes);
+		if (!succes) {
+			glGetShaderInfoLog(fragmentShaderID, 512, nullptr, infoLog);
+			std::cout << "ERROR COMPILING Fragment SHADER \n " << infoLog << std::endl;
 		}
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "ERROR LOADING TEXTURE: " << path << std::endl;
+
+		programID = glCreateProgram();
+		glAttachShader(programID, vertexShaderID);
+		glAttachShader(programID, fragmentShaderID);
+		glLinkProgram(programID);
+
+		glGetProgramiv(programID, GL_LINK_STATUS, &succes);
+		if (!succes) {
+			glGetProgramInfoLog(programID, 512, nullptr, infoLog);
+			std::cout << "ERROR LINKING PRORGAM \n " << infoLog << std::endl;
+		}
+
+		glDeleteShader(vertexShaderID);
+		glDeleteShader(fragmentShaderID);
+
+		delete vertexScr;
+		delete fragmentScr;
+
 	}
 
-	stbi_image_free(data);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	void loadFile(const char* filename, char*& output) {
 
-	return textureID;
-}
+		//open file stream
+		std::ifstream file(filename, std::ios::binary);
+
+		//if the file was succesfully opened
+		if (file.is_open()) {
+			//get lenght of file
+			file.seekg(0, file.end);
+			int lenght = file.tellg();
+			file.seekg(0, file.beg);
+
+			//allocate memory for the char pointer
+			output = new char[lenght + 1];
+
+			// read datat as a block
+			file.read(output, lenght);
+
+			//add null terminator rto end of char pointer
+			output[lenght] = '\0';
+
+			// close the file
+			file.close();
+		}
+		else {
+			// if the file failed to open, set the chart pointer to NULL
+			output = NULL;
+		}
+	}
+
+	GLuint loadTexture(const char* path) {
+		GLuint textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		int width, height, numChannel;
+
+		unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
+
+		if (data) {
+			if (numChannel == 3) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			}
+			else if (numChannel == 4) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			}
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else {
+			std::cout << "ERROR LOADING TEXTURE: " << path << std::endl;
+		}
+
+		stbi_image_free(data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return textureID;
+	}
