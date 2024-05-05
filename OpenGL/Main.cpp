@@ -1,13 +1,22 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <iostream>
 #include <fstream>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // forward Declarations
 int init(GLFWwindow*& window);
-void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
+void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
+GLuint loadTexture(const char* path);
 
 
 // Util
@@ -16,6 +25,9 @@ void loadFile(const char* filename, char*& output);
 //programIDs
 GLuint simpleProgram;
 
+const int WIDTH = 1280;
+const int HEIGHT = 720;
+
 int main()
 {
 	//init
@@ -23,34 +35,49 @@ int main()
 	int res = init(window);
 	if (res != 0) return res;
 
+	createShaders();
 	GLuint triangleVAO, triangleEBO;
 	int triangleSize, triangleIndexCount;
 
-	CreateTriangle(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
-	createShaders();
+	CreateGeometry(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
 
+	GLuint boxTex = loadTexture("texture/container2.png");
 	// Create Viewport
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, WIDTH, HEIGHT);
 
-	// Game render loop
-	while (!glfwWindowShouldClose(window)) {
-		// input handling (TODO)
+	//matrices!
+	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::rotate(world, glm::radians(45.0f), glm::vec3(0, 1, 0));
+	world = glm::scale(world, glm::vec3(1, 1, 1));
+	world = glm::translate(world, glm::vec3(0, 0, 0));
 
-		//rendering
-		glClearColor(0.2, 0.3, 0.3, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+	glm::mat4 view = glm::lookAt(glm::vec3(0, 2.5, -5.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
-		glUseProgram(simpleProgram);
+	glm::mat4 projection = glm::perspective(45.0f, WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-		glBindVertexArray(triangleVAO);
-		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
-		glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
+		// Game render loop
+		while (!glfwWindowShouldClose(window)) {
+			// input handling (TODO)
 
-		glfwSwapBuffers(window);
+			//rendering
+			glClearColor(0.2, 0.3, 0.3, 1.0);
+			glClear(GL_COLOR_BUFFER_BIT);
 
-		//evemts pollen
-		glfwPollEvents();
-	}
+			glUseProgram(simpleProgram);
+
+			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+			glBindVertexArray(triangleVAO);
+			glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+			glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
+
+			glfwSwapBuffers(window);
+
+			//evemts pollen
+			glfwPollEvents();
+		}
 
 	// terminate
 	glfwTerminate();
@@ -68,7 +95,7 @@ int init(GLFWwindow*& window) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create Window
-	window = glfwCreateWindow(1280, 720, "Unity", nullptr, nullptr);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Unity", nullptr, nullptr);
 
 	if (window == nullptr)
 	{
@@ -89,7 +116,7 @@ int init(GLFWwindow*& window) {
 	return 0;
 }
 
-void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
+void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	//float vertices[] = {
 	//	// position				//color
 	//	-0.5, -0.5, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
@@ -118,8 +145,8 @@ void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		-1.0f, 0.0f,		-1.0, 0.0f, 0.0f,
 
 		// 4
-		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, -1.0f,			0.0, 0.0f, -1.0f,
-		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		1.0f, -1.0f,			0.0, 0.0f, -1.0f,
+		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, -1.0f,		0.0, 0.0f, -1.0f,
+		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		1.0f, -1.0f,		0.0, 0.0f, -1.0f,
 
 		// 5
 		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		3.0f, 0.0f,			0.0, 1.0f, 0.0f,
@@ -206,6 +233,9 @@ void CreateTriangle(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 }
 
 void createShaders() {
@@ -292,4 +322,35 @@ void loadFile(const char* filename, char*& output) {
 		// if the file failed to open, set the chart pointer to NULL
 		output = NULL;
 	}
+}
+
+GLuint loadTexture(const char* path) {
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, numChannel;
+
+	unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
+
+	if (!data) {
+		if (numChannel == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+		else if (numChannel == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "ERROR LOADING TEXTURE: " << path << std::endl;
+	}
+
+	stbi_image_free(data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return textureID;
 }
