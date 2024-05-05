@@ -41,7 +41,7 @@ int main()
 
 	CreateGeometry(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
 
-	GLuint boxTex = loadTexture("texture/container2.png");
+	GLuint boxTex = loadTexture("textures/container2.png");
 	// Create Viewport
 	glViewport(0, 0, WIDTH, HEIGHT);
 
@@ -55,34 +55,36 @@ int main()
 
 	glm::mat4 projection = glm::perspective(45.0f, WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-		// Game render loop
-		while (!glfwWindowShouldClose(window)) {
-			// input handling (TODO)
+	// Game render loop
+	while (!glfwWindowShouldClose(window)) {
+		// input handling (TODO)
 
-			//rendering
-			glClearColor(0.2, 0.3, 0.3, 1.0);
-			glClear(GL_COLOR_BUFFER_BIT);
+		//rendering
+		glClearColor(0.2, 0.3, 0.3, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-			glUseProgram(simpleProgram);
+		glUseProgram(simpleProgram);
 
-			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
-			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-			glBindVertexArray(triangleVAO);
-			glDrawArrays(GL_TRIANGLES, 0, triangleSize);
-			glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, boxTex);
 
-			glfwSwapBuffers(window);
+		glBindVertexArray(triangleVAO);
+		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+		glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
 
-			//evemts pollen
-			glfwPollEvents();
-		}
+		glfwSwapBuffers(window);
+
+		//evemts pollen
+		glfwPollEvents();
+	}
 
 	// terminate
 	glfwTerminate();
 
-	std::cout << "Hello World" << std::endl;
 	return 0;
 }
 
@@ -117,93 +119,63 @@ int init(GLFWwindow*& window) {
 }
 
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
-	//float vertices[] = {
-	//	// position				//color
-	//	-0.5, -0.5, 0.0f,		1.0f, 0.0f, 0.0f, 1.0f,
-	//	0.5, -0.5, 0.0f,		0.0f, 1.0f, 0.0f, 1.0f,
-	//	-0.5, 0.5, 0.0f,		0.0f, 0.0f, 1.0f, 1.0f,
-	//	0.5, 0.5, 0.0f,			1.0f, 1.0f, 1.0f, 1.0f,
-	//};
-
 	float vertices[] = {
-		// position				//color					//Tex coords		//normals
-		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			0.0, -1.0f, 0.0f,
-		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			0.0, -1.0f, 0.0f,
-		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			0.0, -1.0f, 0.0f,
-		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			0.0, -1.0f, 0.0f,
+		// positions            //colors            // tex coords   // normals
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
 
-		// 1
-		0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			1.0, 0.0f, 0.0f,
-		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			1.0, 0.0f, 0.0f,
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       1.f, 0.f, 0.f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       1.f, 0.f, 0.f,
 
-		// 2
-		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			0.0, 0.0f, 1.0f,
-		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			0.0, 0.0f, 1.0f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 2.f,       0.f, 0.f, 1.f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 2.f,       0.f, 0.f, 1.f,
 
-		// 3
-		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		-1.0f, 1.0f,		-1.0, 0.0f, 0.0f,
-		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		-1.0f, 0.0f,		-1.0, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   -1.f, 1.f,      -1.f, 0.f, 0.f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   -1.f, 0.f,      -1.f, 0.f, 0.f,
 
-		// 4
-		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, -1.0f,		0.0, 0.0f, -1.0f,
-		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		1.0f, -1.0f,		0.0, 0.0f, -1.0f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, -1.f,      0.f, 0.f, -1.f,
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, -1.f,      0.f, 0.f, -1.f,
 
-		// 5
-		-0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		3.0f, 0.0f,			0.0, 1.0f, 0.0f,
-		-0.5, 0.5, 0.5f,		1.0f, 1.0f, 1.0f,		3.0f, 1.0f,			0.0, 1.0f, 0.0f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   3.f, 0.f,       0.f, 1.f, 0.f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   3.f, 1.f,       0.f, 1.f, 0.f,
 
-		// 6
-		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			0.0, 0.0f, 1.0f,
-		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			0.0, 0.0f, 1.0f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,
 
-		// 7
-		-0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,			-1.0, 0.0f, 0.0f,
-		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			-1.0, 0.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       -1.f, 0.f, 0.f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       -1.f, 0.f, 0.f,
 
-		// 8
-		-0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,			0.0, 0.0f, -1.0f,
-		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			0.0, 0.0f, -1.0f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,
 
-		// 9
-		0.5, -0.5, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,			1.0, 0.0f, 0.0f,
-		0.5, -0.5, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,			1.0, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,
 
-		// 10
-		0.5, 0.5, -0.5f,		1.0f, 1.0f, 1.0f,		2.0f, 0.0f,			0.0, 1.0f, 0.0f,
-		0.5, 0.5, 0.5f,			1.0f, 1.0f, 1.0f,		2.0f, 1.0f,			0.0, 1.0f, 0.0f,
-
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       0.f, 1.f, 0.f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       0.f, 1.f, 0.f
 	};
 
-	//int indices[] = {
-	//	0, 1, 2,
-	//	2, 1, 3
-	//};
-
-	int indices[] = {
-		// down
-		0, 1, 2,
-		0, 2, 3,
-
-		// back
-		14, 6, 7,
-		14, 7, 15,
-
-		//right
-		20, 4, 5,
-		20, 5, 21,
-
-		//left
-		16, 8, 9,
-		16, 9, 17,
-
-		//front
-		18, 10, 11,
-		18, 11, 19,
-
-		//up
-		22, 12, 03,
-		22, 13, 23,
-
+	unsigned int indices[] = {  // note that we start from 0!
+		// DOWN
+		0, 1, 2,   // first triangle
+		0, 2, 3,    // second triangle
+		// BACK
+		14, 6, 7,   // first triangle
+		14, 7, 15,    // second triangle
+		// RIGHT
+		20, 4, 5,   // first triangle
+		20, 5, 21,    // second triangle
+		// LEFT
+		16, 8, 9,   // first triangle
+		16, 9, 17,    // second triangle
+		// FRONT
+		18, 10, 11,   // first triangle
+		18, 11, 19,    // second triangle
+		// UP
+		22, 12, 13,   // first triangle
+		22, 13, 23,    // second triangle
 	};
 
 
@@ -336,7 +308,7 @@ GLuint loadTexture(const char* path) {
 
 	unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
 
-	if (!data) {
+	if (data) {
 		if (numChannel == 3) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
