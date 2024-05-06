@@ -13,6 +13,7 @@
 
 // forward Declarations
 int init(GLFWwindow*& window);
+void processInput(GLFWwindow* window);
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
@@ -34,14 +35,13 @@ int main()
 	GLFWwindow* window;
 	int res = init(window);
 	if (res != 0) return res;
-
 	createShaders();
 	GLuint triangleVAO, triangleEBO;
 	int triangleSize, triangleIndexCount;
 
 	CreateGeometry(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
 
-	GLuint boxTex = loadTexture("textures/container2.png");	
+	GLuint boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
 
 	//set texture channels
@@ -52,21 +52,25 @@ int main()
 	// Create Viewport
 	glViewport(0, 0, WIDTH, HEIGHT);
 
+
+	glm::vec3 lightPosition = glm::vec3(3, 3, 1);
+	glm::vec3 cameraPosition = glm::vec3(0, 2.5f, -5.0f);
+
 	//matrices!
 	glm::mat4 world = glm::mat4(1.0f);
 	world = glm::rotate(world, glm::radians(45.0f), glm::vec3(0, 1, 0));
 	world = glm::scale(world, glm::vec3(1, 1, 1));
 	world = glm::translate(world, glm::vec3(0, 0, 0));
 
-	glm::mat4 view = glm::lookAt(glm::vec3(0, 2.5, -5.0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-	glm::vec3 lightPosition = glm::vec3(3, 3, 1);
 
 	// Game render loop
 	while (!glfwWindowShouldClose(window)) {
 		// input handling (TODO)
+		processInput(window);
 
 		//rendering
 		glClearColor(0.2, 0.3, 0.3, 1.0);
@@ -79,6 +83,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightPosition));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, boxTex);
@@ -132,45 +137,51 @@ int init(GLFWwindow*& window) {
 	return 0;
 }
 
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+}
+
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
-	
-		float vertices[] = {
-			// positions            //colors            // tex coords   // normals          //tangents      //bitangents
-			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
 
-			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+	float vertices[] = {
+		// positions            //colors            // tex coords   // normals          //tangents      //bitangents
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,     -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
 
-			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
 
-			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
 
-			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
 
-			-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-			-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,      0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
 
-			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+		-0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
 
-			-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,     1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
 
-			-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+		-0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   1.f, 1.f,       -1.f, 0.f, 0.f,     0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
 
-			0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-			0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+		-0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,     1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
 
-			0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-			0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f
-		};
+		0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 0.f,       1.f, 0.f, 0.f,     0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+
+		0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+		0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 1.f, 0.f,     1.f, 0.f, 0.f,  0.f, 0.f, 1.f
+	};
 
 	unsigned int indices[] = {  // note that we start from 0!
 		// DOWN
@@ -232,121 +243,121 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 
 	glVertexAttribPointer(5, 3, GL_FLOAT, GL_TRUE, stride, (void*)(14 * sizeof(float)));
 	glEnableVertexAttribArray(5);
+}
+
+void createShaders() {
+
+	createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
+}
+
+void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
+	//create a GL Program with a Vertex & Fragment Shader
+
+	char* vertexScr;
+	char* fragmentScr;
+	loadFile(vertex, vertexScr);
+	loadFile(fragment, fragmentScr);
+
+	GLuint vertexShaderID, fragmentShaderID;
+
+	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShaderID, 1, &vertexScr, nullptr);
+	glCompileShader(vertexShaderID);
+
+	int succes;
+	char infoLog[512];
+	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &succes);
+	if (!succes) {
+		glGetShaderInfoLog(vertexShaderID, 512, nullptr, infoLog);
+		std::cout << "ERROR COMPILING VERTEX SHADER \n " << infoLog << std::endl;
 	}
 
-		void createShaders() {
+	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShaderID, 1, &fragmentScr, nullptr);
+	glCompileShader(fragmentShaderID);
 
-		createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
+	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &succes);
+	if (!succes) {
+		glGetShaderInfoLog(fragmentShaderID, 512, nullptr, infoLog);
+		std::cout << "ERROR COMPILING Fragment SHADER \n " << infoLog << std::endl;
 	}
 
-	void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
-		//create a GL Program with a Vertex & Fragment Shader
+	programID = glCreateProgram();
+	glAttachShader(programID, vertexShaderID);
+	glAttachShader(programID, fragmentShaderID);
+	glLinkProgram(programID);
 
-		char* vertexScr;
-		char* fragmentScr;
-		loadFile(vertex, vertexScr);
-		loadFile(fragment, fragmentScr);
-
-		GLuint vertexShaderID, fragmentShaderID;
-
-		vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertexShaderID, 1, &vertexScr, nullptr);
-		glCompileShader(vertexShaderID);
-
-		int succes;
-		char infoLog[512];
-		glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &succes);
-		if (!succes) {
-			glGetShaderInfoLog(vertexShaderID, 512, nullptr, infoLog);
-			std::cout << "ERROR COMPILING VERTEX SHADER \n " << infoLog << std::endl;
-		}
-
-		fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragmentShaderID, 1, &fragmentScr, nullptr);
-		glCompileShader(fragmentShaderID);
-
-		glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &succes);
-		if (!succes) {
-			glGetShaderInfoLog(fragmentShaderID, 512, nullptr, infoLog);
-			std::cout << "ERROR COMPILING Fragment SHADER \n " << infoLog << std::endl;
-		}
-
-		programID = glCreateProgram();
-		glAttachShader(programID, vertexShaderID);
-		glAttachShader(programID, fragmentShaderID);
-		glLinkProgram(programID);
-
-		glGetProgramiv(programID, GL_LINK_STATUS, &succes);
-		if (!succes) {
-			glGetProgramInfoLog(programID, 512, nullptr, infoLog);
-			std::cout << "ERROR LINKING PRORGAM \n " << infoLog << std::endl;
-		}
-
-		glDeleteShader(vertexShaderID);
-		glDeleteShader(fragmentShaderID);
-
-		delete vertexScr;
-		delete fragmentScr;
-
+	glGetProgramiv(programID, GL_LINK_STATUS, &succes);
+	if (!succes) {
+		glGetProgramInfoLog(programID, 512, nullptr, infoLog);
+		std::cout << "ERROR LINKING PRORGAM \n " << infoLog << std::endl;
 	}
 
-	void loadFile(const char* filename, char*& output) {
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 
-		//open file stream
-		std::ifstream file(filename, std::ios::binary);
+	delete vertexScr;
+	delete fragmentScr;
 
-		//if the file was succesfully opened
-		if (file.is_open()) {
-			//get lenght of file
-			file.seekg(0, file.end);
-			int lenght = file.tellg();
-			file.seekg(0, file.beg);
+}
 
-			//allocate memory for the char pointer
-			output = new char[lenght + 1];
+void loadFile(const char* filename, char*& output) {
 
-			// read datat as a block
-			file.read(output, lenght);
+	//open file stream
+	std::ifstream file(filename, std::ios::binary);
 
-			//add null terminator rto end of char pointer
-			output[lenght] = '\0';
+	//if the file was succesfully opened
+	if (file.is_open()) {
+		//get lenght of file
+		file.seekg(0, file.end);
+		int lenght = file.tellg();
+		file.seekg(0, file.beg);
 
-			// close the file
-			file.close();
+		//allocate memory for the char pointer
+		output = new char[lenght + 1];
+
+		// read datat as a block
+		file.read(output, lenght);
+
+		//add null terminator rto end of char pointer
+		output[lenght] = '\0';
+
+		// close the file
+		file.close();
+	}
+	else {
+		// if the file failed to open, set the chart pointer to NULL
+		output = NULL;
+	}
+}
+
+GLuint loadTexture(const char* path) {
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, numChannel;
+
+	unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
+
+	if (data) {
+		if (numChannel == 3) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
-		else {
-			// if the file failed to open, set the chart pointer to NULL
-			output = NULL;
+		else if (numChannel == 4) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "ERROR LOADING TEXTURE: " << path << std::endl;
 	}
 
-	GLuint loadTexture(const char* path) {
-		GLuint textureID;
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_2D, textureID);
+	stbi_image_free(data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		int width, height, numChannel;
-
-		unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
-
-		if (data) {
-			if (numChannel == 3) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			}
-			else if (numChannel == 4) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			}
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else {
-			std::cout << "ERROR LOADING TEXTURE: " << path << std::endl;
-		}
-
-		stbi_image_free(data);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		return textureID;
-	}
+	return textureID;
+}
