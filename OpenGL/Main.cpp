@@ -13,7 +13,9 @@
 
 // forward Declarations
 int init(GLFWwindow*& window);
-void processInput(GLFWwindow* window);
+void CalculateDeltaTime();
+float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower);
+void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp);
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
@@ -28,6 +30,9 @@ GLuint simpleProgram;
 
 const int WIDTH = 1280;
 const int HEIGHT = 720;
+
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
 
 int main()
 {
@@ -54,7 +59,17 @@ int main()
 
 
 	glm::vec3 lightPosition = glm::vec3(3, 3, 1);
-	glm::vec3 cameraPosition = glm::vec3(0, 2.5f, -5.0f);
+
+	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::vec3 cameraDirection = glm::normalize(cameraPosition - cameraTarget);
+	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+	//glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
 	//matrices!
 	glm::mat4 world = glm::mat4(1.0f);
@@ -62,15 +77,27 @@ int main()
 	world = glm::scale(world, glm::vec3(1, 1, 1));
 	world = glm::translate(world, glm::vec3(0, 0, 0));
 
-	glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	const float radius = 10.0f;
+	float camX = sin(glfwGetTime()) * radius;
+	float camZ = cos(glfwGetTime()) * radius;
+
+	glm::mat4 view;
+	view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+	//glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 
 	// Game render loop
 	while (!glfwWindowShouldClose(window)) {
+		CalculateDeltaTime();
+
 		// input handling (TODO)
-		processInput(window);
+		processInput(window, cameraFront, cameraPosition, cameraUp);
+
+		glm::mat4 view;
+		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
 		//rendering
 		glClearColor(0.2, 0.3, 0.3, 1.0);
@@ -137,10 +164,42 @@ int init(GLFWwindow*& window) {
 	return 0;
 }
 
-void processInput(GLFWwindow* window) {
+void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp) {
+	// escape program
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
+
+	//get cameraSpeed
+	float cameraPower = 2.5f;
+	float cameraSpeed = CalculateCameraSpeed(window, cameraPower);
+
+	glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	// check move Input program
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		cameraPos += worldUp * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		cameraPos -= worldUp * cameraSpeed;
+}
+
+float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower) {
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+		cameraPower = 5.0f;
+	}
+	else {
+		cameraPower = 2.5f;
+	}
+	float cameraSpeed = cameraPower * deltaTime;
+	return cameraSpeed;
 }
 
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
@@ -218,11 +277,11 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 
 	// set layout of vertex data
@@ -360,4 +419,10 @@ GLuint loadTexture(const char* path) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return textureID;
+}
+
+void CalculateDeltaTime() {
+	float currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 }
