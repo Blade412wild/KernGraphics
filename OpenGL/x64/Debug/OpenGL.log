@@ -1,7 +1,7 @@
 ﻿  Main.cpp
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(81,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(82,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(103,34): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(372,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(425,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(99,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(100,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(123,34): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(429,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(482,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   OpenGL.vcxproj -> C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.exe

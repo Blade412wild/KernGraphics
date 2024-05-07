@@ -16,6 +16,7 @@ int init(GLFWwindow*& window);
 void CalculateDeltaTime();
 float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower);
 void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
@@ -31,15 +32,37 @@ GLuint simpleProgram;
 const int WIDTH = 1280;
 const int HEIGHT = 720;
 
+// time 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+// camera 
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+// mouse Input;
+float lastX = WIDTH / 2;
+float lastY = HEIGHT / 2;
+float yaw = -90.0f;
+float pitch = 0;
+bool firstMouse = true;
+
+
+
 int main()
 {
+
 	//init
 	GLFWwindow* window;
 	int res = init(window);
 	if (res != 0) return res;
+
+	glfwSetCursorPosCallback(window, mouse_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	createShaders();
 	GLuint triangleVAO, triangleEBO;
 	int triangleSize, triangleIndexCount;
@@ -63,13 +86,8 @@ int main()
 	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 	glm::vec3 cameraDirection = glm::normalize(cameraPosition - cameraTarget);
 	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-	//glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
 	//matrices!
 	glm::mat4 world = glm::mat4(1.0f);
@@ -95,6 +113,8 @@ int main()
 
 		// input handling (TODO)
 		processInput(window, cameraFront, cameraPosition, cameraUp);
+
+		//mouse_callback(window, lastX, lastY, cameraFront);
 
 		glm::mat4 view;
 		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
@@ -162,6 +182,43 @@ int init(GLFWwindow*& window) {
 		return -2;
 	}
 	return 0;
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.1f; // change this value to your liking
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	// make sure that when pitch is out of bounds, screen doesn't get flipped
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
 }
 
 void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp) {
