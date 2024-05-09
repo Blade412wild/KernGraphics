@@ -4,7 +4,7 @@ out vec4 FragColor;
 in vec3 color;
 in vec2 uv;
 in mat3 tbn;
-in vec3 worldPosition;
+in vec4 worldPosition;
 
 uniform sampler2D mainTex;
 uniform sampler2D normalTex;
@@ -22,10 +22,10 @@ void main() {
 	// transform with TBN
 	normal = tbn * normal;
 
-	vec3 lightDirection = normalize(worldPosition - lightPosition);
+	vec3 lightDirection = normalize(worldPosition.xyz - lightPosition);
 
 	//specular data
-	vec3 viewDir = normalize(worldPosition - cameraPosition);
+	vec3 viewDir = normalize(worldPosition.xyz - cameraPosition);
 	vec3 reflDir = normalize(reflect(lightDirection, normal));
 
 	//lighting

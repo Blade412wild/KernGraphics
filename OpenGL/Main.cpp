@@ -21,6 +21,8 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
 GLuint loadTexture(const char* path);
+void renderSkyBox();
+
 
 
 // Util
@@ -28,6 +30,7 @@ void loadFile(const char* filename, char*& output);
 
 //programIDs
 GLuint simpleProgram;
+GLuint skyProgram;
 
 const int WIDTH = 1280;
 const int HEIGHT = 720;
@@ -48,7 +51,13 @@ float yaw = -90.0f;
 float pitch = 0;
 bool firstMouse = true;
 
+// World Data
+glm::vec3 lightDirection = glm::normalize(glm::vec3(0, -0.5f, -0.5f));
+GLuint boxVAO, boxEBO;
+int boxSize, boxIndexCount;
 
+glm::mat4 view;
+glm::mat4 projection;
 
 int main()
 {
@@ -64,10 +73,7 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	createShaders();
-	GLuint triangleVAO, triangleEBO;
-	int triangleSize, triangleIndexCount;
-
-	CreateGeometry(triangleVAO, triangleEBO, triangleSize, triangleIndexCount);
+	CreateGeometry(boxVAO, boxEBO, boxSize, boxIndexCount);
 
 	GLuint boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
@@ -81,7 +87,6 @@ int main()
 	glViewport(0, 0, WIDTH, HEIGHT);
 
 
-	glm::vec3 lightPosition = glm::vec3(3, 3, 1);
 
 	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -90,39 +95,30 @@ int main()
 	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 
 	//matrices!
-	glm::mat4 world = glm::mat4(1.0f);
-	world = glm::rotate(world, glm::radians(45.0f), glm::vec3(0, 1, 0));
-	world = glm::scale(world, glm::vec3(1, 1, 1));
-	world = glm::translate(world, glm::vec3(0, 0, 0));
-
-	const float radius = 10.0f;
-	float camX = sin(glfwGetTime()) * radius;
-	float camZ = cos(glfwGetTime()) * radius;
-
-	glm::mat4 view;
-	view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
-	//glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 
 	// Game render loop
 	while (!glfwWindowShouldClose(window)) {
 		CalculateDeltaTime();
 
+
 		// input handling (TODO)
 		processInput(window, cameraFront, cameraPosition, cameraUp);
 
-		//mouse_callback(window, lastX, lastY, cameraFront);
+		std::cout << cameraPosition.x << std::endl;
 
-		glm::mat4 view;
 		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
 		//rendering
-		glClearColor(0.2, 0.3, 0.3, 1.0);
+		//glClearColor(0.2, 0.3, 0.3, 1.0); //beautiful green
+		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		//glEnable(GL_CULL_FACE);
+
+		renderSkyBox();
+		/*
 		glUseProgram(simpleProgram);
 
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
@@ -141,17 +137,45 @@ int main()
 		glBindVertexArray(triangleVAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
 		glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
+		*/
 
 		glfwSwapBuffers(window);
 
 		//evemts pollen
 		glfwPollEvents();
+
 	}
+	glDisable(GL_CULL_FACE);
 
 	// terminate
 	glfwTerminate();
 
 	return 0;
+}
+void renderSkyBox() {
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+
+
+	glUseProgram(skyProgram);
+	//matrices!
+	glm::mat4 world = glm::mat4(1.0f);
+	world = glm::translate(world, cameraPosition);
+	world = glm::scale(world, glm::vec3(10, 10, 10));
+
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightDirection));
+	glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+
+	//rendering
+	glBindVertexArray(boxVAO);
+	glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 }
 
 int init(GLFWwindow*& window) {
@@ -364,6 +388,7 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 void createShaders() {
 
 	createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
+	createProgram(skyProgram, "shaders/SkyVertex.shader", "shaders/SkyFragment.shader");
 }
 
 void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
@@ -483,3 +508,4 @@ void CalculateDeltaTime() {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 }
+

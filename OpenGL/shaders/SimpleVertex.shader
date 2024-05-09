@@ -10,7 +10,7 @@ layout(location = 5) in vec3 vBitangent;
 out vec3 color;
 out vec2 uv;
 out mat3 tbn;
-out vec3 worldPosition;
+out vec4 worldPosition;
 
 uniform mat4 world, view, projection;
 
@@ -24,5 +24,5 @@ void main() {
 	vec3 n = normalize(mat3(world) * vNormal);
 	tbn = mat3(t, b, n);
 
-	worldPosition = mat3(world) * aPos;
+	worldPosition = world * vec4(aPos, 1.0);
 }
