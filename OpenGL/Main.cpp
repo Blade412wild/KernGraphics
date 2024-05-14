@@ -52,7 +52,7 @@ float pitch = 0;
 bool firstMouse = true;
 
 // World Data
-glm::vec3 lightDirection = glm::normalize(glm::vec3(0, -0.5f, -0.5f));
+glm::vec3 lightDirection = glm::normalize(glm::vec3(0, 0.5f, 0.5f));
 GLuint boxVAO, boxEBO;
 int boxSize, boxIndexCount;
 
@@ -167,8 +167,8 @@ void renderSkyBox() {
 	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightDirection));
-	glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+	glUniform3fv(glGetUniformLocation(skyProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
+	glUniform3fv(glGetUniformLocation(skyProgram, "cameraPosition"), 0, glm::value_ptr(cameraPosition));
 
 	//rendering
 	glBindVertexArray(boxVAO);

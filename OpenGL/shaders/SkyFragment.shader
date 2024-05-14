@@ -18,6 +18,6 @@ void main() {
 
 
 	//specular data
-	vec3 viewDir = normalize(worldPosition - cameraPosition);
-	FragColor = vec4(Lerp(botColor, topColor, viewDir.y, 0.0, 1);
+	vec3 viewDir = normalize(worldPosition.rgb - cameraPosition);
+	FragColor = vec4(Lerp(botColor, topColor, viewDir.y), 1);
 }
