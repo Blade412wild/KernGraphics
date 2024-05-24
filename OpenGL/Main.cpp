@@ -106,7 +106,7 @@ int main()
 		// input handling (TODO)
 		processInput(window, cameraFront, cameraPosition, cameraUp);
 
-		std::cout << cameraPosition.x << std::endl;
+		//std::cout << cameraPosition.x << std::endl;
 
 		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
@@ -231,6 +231,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 	yaw += xoffset;
 	pitch += yoffset;
+	//pitch = glm::clamp(pitch - ypos, -90.0f, 90.0f);
 
 	// make sure that when pitch is out of bounds, screen doesn't get flipped
 	if (pitch > 89.0f)
