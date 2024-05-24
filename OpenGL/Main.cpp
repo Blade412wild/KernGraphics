@@ -118,35 +118,36 @@ int main()
 		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
 		//rendering
-		//glClearColor(0.2, 0.3, 0.3, 1.0); //beautiful green
-		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClearColor(0.2, 0.3, 0.3, 1.0); //beautiful green
+		//glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		//glEnable(GL_CULL_FACE);
 
 		renderSkyBox();
 		renderTerrain();
 
-		/*
+		
 		glUseProgram(simpleProgram);
 
-		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		glUniform3fv(glGetUniformLocation(simpleProgram, "lightPosition"), 1, glm::value_ptr(lightPosition));
-		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "lightposition"), 1, glm::value_ptr(lightDirection));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, boxTex);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, boxNormal);
+		glBindTexture(GL_TEXTURE1, boxNormal);
 
 
-		glBindVertexArray(triangleVAO);
-		glDrawArrays(GL_TRIANGLES, 0, triangleSize);
-		glDrawElements(GL_TRIANGLES, triangleIndexCount, GL_UNSIGNED_INT, 0);
-		*/
+		glBindVertexArray(boxVAO);
+		//glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+		glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+		
 
 		glfwSwapBuffers(window);
 
@@ -163,7 +164,7 @@ int main()
 }
 void renderSkyBox() {
 	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH);
 
 
 	glUseProgram(skyProgram);
@@ -184,11 +185,37 @@ void renderSkyBox() {
 	glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
 
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH);
+
+
+
 }
 
 void renderTerrain() {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH);
+	//glDisable(GL_DEPTH);
+	glCullFace(GL_BACK);
 
+	glUseProgram(terrainProgram);
+	//matrices!
+	glm::mat4 world = glm::mat4(1.0f);
+	//world = glm::translate(world, cameraPosition);
+	//world = glm::scale(world, glm::vec3(10, 10, 10));
+
+	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	glUniform3fv(glGetUniformLocation(terrainProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
+	glUniform3fv(glGetUniformLocation(terrainProgram, "cameraPosition"), 0, glm::value_ptr(cameraPosition));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, heightmapID);
+
+	//rendering
+	glBindVertexArray(terrainVAO);
+	glDrawElements(GL_TRIANGLES, terrainIndexCount, GL_UNSIGNED_INT, 0);
 }
 
 int init(GLFWwindow*& window) {
@@ -523,8 +550,7 @@ void CalculateDeltaTime() {
 	lastFrame = currentFrame;
 }
 
-
-unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& size, unsigned int& heightmapID) {
+unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID) {
 	int width, height, channels;
 	unsigned char* data = nullptr;
 	if (heightmap != nullptr) {
@@ -532,8 +558,10 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 		if (data) {
 			glGenTextures(1, &heightmapID);
 			glBindTexture(GL_TEXTURE_2D, heightmapID);
+
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
 			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -548,7 +576,7 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	for (int i = 0; i < (width * height); i++) {
 		// TODO: calculate x/z values
 		int x = i % width;
-		int z = i / width ;
+		int z = i / width;
 
 		// TODO: set position
 		vertices[index++] = x * xzScale;
@@ -582,12 +610,12 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 
 		indices[index++] = vertex;
 		indices[index++] = vertex + width + 1;
-		indices[index++] = vertex + 1; 
+		indices[index++] = vertex + 1;
 
 	}
 
 	unsigned int vertSize = (width * height) * stride * sizeof(float);
-	size = ((width - 1) * (height - 1) * 6) * sizeof(unsigned int);
+	indexCount = ((width - 1) * (height - 1) * 6);
 
 	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -599,9 +627,9 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
-	// vertex information
+	// vertex information!
 	// position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 	glEnableVertexAttribArray(0);
@@ -613,10 +641,12 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glBindVertexArray(0);
 
 	delete[] vertices;
 	delete[] indices;
+
 	stbi_image_free(data);
 
 	return VAO;
