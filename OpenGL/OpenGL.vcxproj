@@ -145,6 +145,8 @@
     <None Include="shaders\SimpleVertex.shader" />
     <None Include="shaders\SkyFragment.shader" />
     <None Include="shaders\SkyVertex.shader" />
+    <None Include="shaders\TerrainFragment.shader" />
+    <None Include="shaders\TerrainVertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h" />

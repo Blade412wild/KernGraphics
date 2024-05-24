@@ -14,6 +14,7 @@
 // forward Declarations
 int init(GLFWwindow*& window);
 void CalculateDeltaTime();
+unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& size, unsigned int& heightmapID);
 float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower);
 void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -22,7 +23,7 @@ void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
 GLuint loadTexture(const char* path);
 void renderSkyBox();
-
+void renderTerrain();
 
 
 // Util
@@ -31,6 +32,7 @@ void loadFile(const char* filename, char*& output);
 //programIDs
 GLuint simpleProgram;
 GLuint skyProgram;
+GLuint terrainProgram;
 
 const int WIDTH = 1280;
 const int HEIGHT = 720;
@@ -55,9 +57,12 @@ bool firstMouse = true;
 glm::vec3 lightDirection = glm::normalize(glm::vec3(0, 0.5f, 0.5f));
 GLuint boxVAO, boxEBO;
 int boxSize, boxIndexCount;
-
+ 
 glm::mat4 view;
 glm::mat4 projection;
+
+// Terrain data
+GLuint terrainVAO, terrainIndexCount, heightmapID;
 
 int main()
 {
@@ -74,6 +79,8 @@ int main()
 
 	createShaders();
 	CreateGeometry(boxVAO, boxEBO, boxSize, boxIndexCount);
+
+	terrainVAO = GeneratePlane("textures/Heightmap.png", GL_RGBA, 4, 100.0f, 5.0f, terrainIndexCount, heightmapID);
 
 	GLuint boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
@@ -118,6 +125,8 @@ int main()
 		//glEnable(GL_CULL_FACE);
 
 		renderSkyBox();
+		renderTerrain();
+
 		/*
 		glUseProgram(simpleProgram);
 
@@ -176,6 +185,10 @@ void renderSkyBox() {
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+}
+
+void renderTerrain() {
+
 }
 
 int init(GLFWwindow*& window) {
@@ -387,9 +400,9 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 }
 
 void createShaders() {
-
 	createProgram(simpleProgram, "shaders/simpleVertex.shader", "shaders/simpleFragment.shader");
 	createProgram(skyProgram, "shaders/SkyVertex.shader", "shaders/SkyFragment.shader");
+	createProgram(terrainProgram, "shaders/TerrainVertex.shader", "shaders/TerrainFragment.shader");
 }
 
 void createProgram(GLuint& programID, const char* vertex, const char* fragment) {
@@ -510,3 +523,101 @@ void CalculateDeltaTime() {
 	lastFrame = currentFrame;
 }
 
+
+unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& size, unsigned int& heightmapID) {
+	int width, height, channels;
+	unsigned char* data = nullptr;
+	if (heightmap != nullptr) {
+		data = stbi_load(heightmap, &width, &height, &channels, comp);
+		if (data) {
+			glGenTextures(1, &heightmapID);
+			glBindTexture(GL_TEXTURE_2D, heightmapID);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
+
+	int stride = 8;
+	float* vertices = new float[(width * height) * stride];
+	unsigned int* indices = new unsigned int[(width - 1) * (height - 1) * 6];
+
+	int index = 0;
+	for (int i = 0; i < (width * height); i++) {
+		// TODO: calculate x/z values
+		int x = i % width;
+		int z = i / width ;
+
+		// TODO: set position
+		vertices[index++] = x * xzScale;
+		vertices[index++] = 0;
+		vertices[index++] = z * xzScale;
+
+		// TODO: set normal
+		vertices[index++] = 0;
+		vertices[index++] = 1;
+		vertices[index++] = 0;
+
+		// TODO: set uv
+		vertices[index++] = x / (float)width;
+		vertices[index++] = z / (float)height;
+
+	}
+
+	// OPTIONAL TODO: Calculate normal
+	// TODO: Set normal
+
+	index = 0;
+	for (int i = 0; i < (width - 1) * (height - 1); i++) {
+		int x = i % (width - 1);
+		int z = i / (width - 1);
+
+		int vertex = x * width + x;
+
+		indices[index++] = vertex;
+		indices[index++] = vertex + width;
+		indices[index++] = vertex + width + 1;
+
+		indices[index++] = vertex;
+		indices[index++] = vertex + width + 1;
+		indices[index++] = vertex + 1; 
+
+	}
+
+	unsigned int vertSize = (width * height) * stride * sizeof(float);
+	size = ((width - 1) * (height - 1) * 6) * sizeof(unsigned int);
+
+	unsigned int VAO, VBO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+
+	// vertex information
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
+	glEnableVertexAttribArray(0);
+	// normal
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
+	// uv
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	delete[] vertices;
+	delete[] indices;
+	stbi_image_free(data);
+
+	return VAO;
+}

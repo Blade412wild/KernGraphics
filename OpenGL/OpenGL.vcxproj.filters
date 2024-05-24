@@ -38,6 +38,12 @@
     <None Include="shaders\SkyVertex.shader">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="shaders\TerrainFragment.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\TerrainVertex.shader">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
