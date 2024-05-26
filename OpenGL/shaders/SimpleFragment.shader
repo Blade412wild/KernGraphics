@@ -29,7 +29,7 @@ void main() {
 	vec3 reflDir = normalize(reflect(lightDirection, normal));
 
 	//lighting
-	float lightValue = max(-dot(normal, lightDirection), 0.0);
+	float lightValue = max(dot(normal, lightDirection), 0.0);
 	float specular = pow(max( - dot(reflDir, viewDir), 0.0), 8.0);
 
 	//seperate RGB and Aplha calculations
