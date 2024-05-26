@@ -14,7 +14,7 @@
 // forward Declarations
 int init(GLFWwindow*& window);
 void CalculateDeltaTime();
-unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& size, unsigned int& heightmapID);
+unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float hScale, float xzScale, unsigned int& indexCount, unsigned int& heightmapID);
 float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower);
 void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraPos, glm::vec3& cameraUp);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -45,6 +45,8 @@ float lastFrame = 0.0f; // Time of last frame
 glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float normalPower = 25.0f;
+float fastPower = 50.0f;
 
 // mouse Input;
 float lastX = WIDTH / 2;
@@ -57,7 +59,7 @@ bool firstMouse = true;
 glm::vec3 lightDirection = glm::normalize(glm::vec3(0, 0.5f, 0.5f));
 GLuint boxVAO, boxEBO;
 int boxSize, boxIndexCount;
- 
+
 glm::mat4 view;
 glm::mat4 projection;
 
@@ -102,52 +104,45 @@ int main()
 	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 
 	//matrices!
-	projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 5000.0f);
 
 
 	// Game render loop
 	while (!glfwWindowShouldClose(window)) {
 		CalculateDeltaTime();
 
-
 		// input handling (TODO)
 		processInput(window, cameraFront, cameraPosition, cameraUp);
-
-		//std::cout << cameraPosition.x << std::endl;
-
 		view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
 		//rendering
 		glClearColor(0.2, 0.3, 0.3, 1.0); //beautiful green
-		//glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_DEPTH_BUFFER_BIT);
-
-		//glEnable(GL_CULL_FACE);
 
 		renderSkyBox();
 		renderTerrain();
 
-		
-		glUseProgram(simpleProgram);
 
-		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		//glUseProgram(simpleProgram);
 
-		glUniform3fv(glGetUniformLocation(simpleProgram, "lightposition"), 1, glm::value_ptr(lightDirection));
-		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
+		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, boxTex);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE1, boxNormal);
+		//glUniform3fv(glGetUniformLocation(simpleProgram, "lightposition"), 1, glm::value_ptr(lightDirection));
+		//glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
+
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, boxTex);
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE1, boxNormal);
 
 
-		glBindVertexArray(boxVAO);
-		//glDrawArrays(GL_TRIANGLES, 0, triangleSize);
-		glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
-		
+		//glBindVertexArray(boxVAO);
+		////glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+		//glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+		//
 
 		glfwSwapBuffers(window);
 
@@ -208,7 +203,7 @@ void renderTerrain() {
 	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	glUniform3fv(glGetUniformLocation(terrainProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
-	glUniform3fv(glGetUniformLocation(terrainProgram, "cameraPosition"), 0, glm::value_ptr(cameraPosition));
+	glUniform3fv(glGetUniformLocation(terrainProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, heightmapID);
@@ -315,10 +310,10 @@ void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraP
 
 float CalculateCameraSpeed(GLFWwindow* window, float& cameraPower) {
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		cameraPower = 5.0f;
+		cameraPower = fastPower;
 	}
 	else {
-		cameraPower = 2.5f;
+		cameraPower = normalPower;
 	}
 	float cameraSpeed = cameraPower * deltaTime;
 	return cameraSpeed;
@@ -602,7 +597,7 @@ unsigned int GeneratePlane(const char* heightmap, GLenum format, int comp, float
 		int x = i % (width - 1);
 		int z = i / (width - 1);
 
-		int vertex = x * width + x;
+		int vertex = z * width + x;
 
 		indices[index++] = vertex;
 		indices[index++] = vertex + width;
