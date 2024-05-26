@@ -21,7 +21,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices);
 void createShaders();
 void createProgram(GLuint& programID, const char* vertex, const char* fragment);
-GLuint loadTexture(const char* path);
+GLuint loadTexture(const char* path, int comp = 0 );
 void renderSkyBox();
 void renderTerrain();
 
@@ -67,6 +67,8 @@ glm::mat4 projection;
 GLuint terrainVAO, terrainIndexCount, heightmapID, heightNormalID;
 unsigned char* heightmapTexture;
 
+GLuint dirt, sand, grass, rock, snow;
+
 int main()
 {
 
@@ -87,6 +89,12 @@ int main()
 	heightNormalID = loadTexture("textures/heightnormal.png");
 	GLuint boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
+
+	dirt = loadTexture("textures/dirt.jpg");
+	sand = loadTexture("textures/sand.jpg");
+	grass = loadTexture("textures/grass.png", 4);
+	rock = loadTexture("textures/rock.jpg");
+	snow = loadTexture("textures/snow.jpg");
 
 
 
@@ -201,6 +209,9 @@ void renderTerrain() {
 	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+	float t = glfwGetTime();
+	//lightDirection = glm::normalize(glm::vec3(glm::sin(t), 0.5, glm::cos(t)));
+
 	glUniform3fv(glGetUniformLocation(terrainProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
 	glUniform3fv(glGetUniformLocation(terrainProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
@@ -209,6 +220,22 @@ void renderTerrain() {
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, heightNormalID);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, dirt);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, sand);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, grass);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, rock);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, snow);
+
 
 	//rendering
 	glBindVertexArray(terrainVAO);
@@ -438,6 +465,12 @@ void createShaders() {
 	glUseProgram(terrainProgram);
 	glUniform1i(glGetUniformLocation(terrainProgram, "mainTex"), 0);
 	glUniform1i(glGetUniformLocation(terrainProgram, "normalTex"), 1);
+
+	glUniform1i(glGetUniformLocation(terrainProgram, "dirt"), 2);
+	glUniform1i(glGetUniformLocation(terrainProgram, "sand"), 3); 
+	glUniform1i(glGetUniformLocation(terrainProgram, "grass"), 4);
+	glUniform1i(glGetUniformLocation(terrainProgram, "rock"), 5);
+	glUniform1i(glGetUniformLocation(terrainProgram, "snow"), 6);
 }
 
 
@@ -522,7 +555,7 @@ void loadFile(const char* filename, char*& output) {
 	}
 }
 
-GLuint loadTexture(const char* path) {
+GLuint loadTexture(const char* path, int comp) {
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -532,9 +565,11 @@ GLuint loadTexture(const char* path) {
 
 	int width, height, numChannel;
 
-	unsigned char* data = stbi_load(path, &width, &height, &numChannel, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &numChannel, comp);
 
 	if (data) {
+		if (comp != 0) numChannel = comp;
+
 		if (numChannel == 3) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
