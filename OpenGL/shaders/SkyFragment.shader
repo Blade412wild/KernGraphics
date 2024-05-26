@@ -22,5 +22,5 @@ void main() {
 	vec3 viewDir = normalize(worldPosition.rgb - cameraPosition);
 
 	float sun = max(pow(dot(viewDir, lightDirection), 128), 0.0);
-	FragColor = vec4(Lerp(botColor, topColor, abs(viewDir.y)) + sun * sunColor, 1);
+	FragColor = vec4(Lerp(botColor, topColor, max(viewDir.y, 0.0)) + sun * sunColor, 1);
 }

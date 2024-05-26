@@ -188,9 +188,6 @@ void renderSkyBox() {
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH);
-
-
-
 }
 
 void renderTerrain() {

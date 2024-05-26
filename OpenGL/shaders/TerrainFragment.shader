@@ -28,7 +28,7 @@ void main() {
 
 
 	//specular data
-	//vec3 viewDir = normalize(worldPosition.xyz - cameraPosition);
+	vec3 viewDir = normalize(worldPosition.xyz - cameraPosition);
 	//vec3 reflDir = normalize(reflect(lightDirection, normal));
 
 	//lighting
@@ -44,7 +44,7 @@ void main() {
 	float rs = clamp((y - 200) / 10, -1, 1) * .5 + .5;
 
 	float dist = length(worldPosition.xyz - cameraPosition);
-	float uvLerp = clamp((dist - 250) / 150, - 1, 1) * .5 + .5;
+	float uvLerp = clamp((dist - 250) / 150, -1, 1) * .5 + .5;
 
 	vec3 dirtColorClose = texture(dirt, uv * 100).rgb;
 	vec3 sandColorClose = texture(sand, uv * 100).rgb;
@@ -67,12 +67,19 @@ void main() {
 
 	vec3 diffuse = lerp(lerp(lerp(lerp(dirtColor, sandColor, ds), grassColor, sg), rockColor, gr), snowColor, rs);
 
+	float fog = pow(clamp((dist - 250) / 1000, 0, 1), 2);
+
+	vec3 topColor = vec3(68.0f / 255.0f, 118.0f / 255.0f, 189.0 / 255.0f);
+	vec3 botColor = vec3(188.0f / 255.0f, 214.0f / 255.0f, 231.0 / 255.0f);
+
+	vec3 fogColor = lerp(botColor, topColor, max(viewDir.y, 0.0));
+
 
 
 	//seperate RGB and Aplha calculations
 	//vec4 output = texture(grass, uv);
 	//output.rgb = vec3(min(lightValue + 0.1, 1.0));
-	vec4 output = vec4(diffuse * min(lightValue + 0.1, 1.0), 1.0);// + specular;
+	vec4 output = vec4( lerp(diffuse * min(lightValue + 0.1, 1.0), fogColor, fog),  1.0);// + specular;
 
 	FragColor = output;
 }
