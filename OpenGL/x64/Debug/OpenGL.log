@@ -1,9 +1,0 @@
-﻿  Main.cpp
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(134,34): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(141,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(222,10): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(555,14): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\Main.cpp(610,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  OpenGL.vcxproj -> C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.exe
-  'pwsh.exe' is not recognized as an internal or external command,
-  operable program or batch file.

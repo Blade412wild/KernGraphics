@@ -1,8 +1,0 @@
-C:\KernGraphics\OpenGL\x64\Debug\OpenGL.exe
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.exe
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\OpenGL.vcxproj.CopyComplete
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\assimp-vc143-mtd.dll
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\poly2tri.dll
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\minizip.dll
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\zlibd1.dll
-C:\Users\Nathan\Documents\GitHub\KernGraphics\OpenGL\x64\Debug\pugixml.dll
