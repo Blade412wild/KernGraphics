@@ -56,7 +56,7 @@ void main()
 
     vec4 output = lerp(diffuse * max(light * ambientOcclusion, 0.2 * ambientOcclusion) + vec4(specular, 0), vec4(fogColor, 1.0), fog);
    
-    if (output.a < 0.5) discard;
+    //if (output.a < 0.5) discard;
     
     FragColor = output;
 

@@ -75,6 +75,9 @@ unsigned char* heightmapTexture;
 GLuint dirt, sand, grass, rock, snow;
 
 Model* backPack;
+Model* demonKing;
+Model* house;
+Model* ball;
 
 int main()
 {
@@ -105,7 +108,11 @@ int main()
 	rock = loadTexture("textures/rock.jpg");
 	snow = loadTexture("textures/snow.jpg");
 
-	backPack = new Model("models/backpack/backpack.obj");
+	//backPack = new Model("models/backpack/backpack.obj");
+	demonKing = new Model("BigModel/DemonKing.obj");
+	house = new Model("models/House/LOD0_fantasy_house.obj");
+	ball = new Model("models/ball/baseBall.obj");
+	
 
 	// Create Viewport
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -140,8 +147,11 @@ int main()
 
 		float t = glfwGetTime();
 
-		renderModel(backPack, glm::vec3(1000,200,1000), glm::vec3(0,t,0), glm::vec3(50,50,50));
-
+		//renderModel(backPack, glm::vec3(10, 50, 10), glm::vec3(0,t,0), glm::vec3(10,10,10));
+		renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
+		//renderModel(house, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+		renderModel(ball, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		
 
 		glUseProgram(simpleProgram);
 
@@ -729,7 +739,7 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
 
 	//multiply blend
-	glBlendFunc(GL_DST_COLOR, GL_ZERO);
+	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
 	// double multiply blend
 	
