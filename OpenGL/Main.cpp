@@ -76,9 +76,10 @@ GLuint dirt, sand, grass, rock, snow;
 
 Model* backPack;
 Model* demonKing;
-Model* house;
-Model* ball;
 Model* buddha;
+Model* fishingRot;
+Model* hat;
+Model* fish;
 
 int main()
 {
@@ -109,13 +110,14 @@ int main()
 	rock = loadTexture("textures/rock.jpg");
 	snow = loadTexture("textures/snow.jpg");
 
-	//backPack = new Model("models/backpack/backpack.obj");
+	backPack = new Model("models/backpack/backpack.obj");
 
 	stbi_set_flip_vertically_on_load(false);
-	demonKing = new Model("BigModel/DemonKing.obj");
-	//house = new Model("models/House/LOD0_fantasy_house.obj");
-	//ball = new Model("models/ball/baseBall.obj");
+	fishingRot = new Model("models/fishing/fishingRot.obj");
+	//demonKing = new Model("BigModel/DemonKing.obj");
 	buddha = new Model("BigModel/Budha/Buddha.obj");
+	hat = new Model("models/hat/hat.obj");
+	fish = new Model("models/carp/carp.obj");
 	
 
 	// Create Viewport
@@ -151,11 +153,13 @@ int main()
 
 		float t = glfwGetTime();
 
-		//renderModel(ball, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		//renderModel(backPack, glm::vec3(10, 50, 10), glm::vec3(0,t,0), glm::vec3(10,10,10));
+		renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0,3,0), glm::vec3(3,3,2.8));
 		renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
-		//renderModel(house, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+		renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0,-2.3, 0), glm::vec3(14, 14, 14));
+		renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
+
+		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
 		
 
 		glUseProgram(simpleProgram);
@@ -733,7 +737,7 @@ unsigned int GeneratePlane(const char* heightmap, unsigned char*& data, GLenum f
 }
 
 void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
-	//glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 
 	// alpha blend
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -772,6 +776,6 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	
 	
 	model->Draw(modelProgram);
-	//glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
 
 }
