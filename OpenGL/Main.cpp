@@ -110,7 +110,9 @@ int main()
 	snow = loadTexture("textures/snow.jpg");
 
 	//backPack = new Model("models/backpack/backpack.obj");
-	//demonKing = new Model("BigModel/DemonKing.obj");
+
+	stbi_set_flip_vertically_on_load(false);
+	demonKing = new Model("BigModel/DemonKing.obj");
 	//house = new Model("models/House/LOD0_fantasy_house.obj");
 	//ball = new Model("models/ball/baseBall.obj");
 	buddha = new Model("BigModel/Budha/Buddha.obj");
@@ -150,9 +152,9 @@ int main()
 		float t = glfwGetTime();
 
 		//renderModel(ball, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		//renderModel(backPack, glm::vec3(10, 50, 10), glm::vec3(0,t,0), glm::vec3(10,10,10));
-		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
+		renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
 		//renderModel(house, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 		
 
