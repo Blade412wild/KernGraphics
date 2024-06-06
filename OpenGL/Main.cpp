@@ -78,6 +78,7 @@ Model* backPack;
 Model* demonKing;
 Model* house;
 Model* ball;
+Model* buddha;
 
 int main()
 {
@@ -109,9 +110,10 @@ int main()
 	snow = loadTexture("textures/snow.jpg");
 
 	//backPack = new Model("models/backpack/backpack.obj");
-	demonKing = new Model("BigModel/DemonKing.obj");
-	house = new Model("models/House/LOD0_fantasy_house.obj");
-	ball = new Model("models/ball/baseBall.obj");
+	//demonKing = new Model("BigModel/DemonKing.obj");
+	//house = new Model("models/House/LOD0_fantasy_house.obj");
+	//ball = new Model("models/ball/baseBall.obj");
+	buddha = new Model("BigModel/Budha/Buddha.obj");
 	
 
 	// Create Viewport
@@ -147,10 +149,11 @@ int main()
 
 		float t = glfwGetTime();
 
+		//renderModel(ball, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		//renderModel(backPack, glm::vec3(10, 50, 10), glm::vec3(0,t,0), glm::vec3(10,10,10));
-		renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
+		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
 		//renderModel(house, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
-		renderModel(ball, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		
 
 		glUseProgram(simpleProgram);
@@ -728,7 +731,7 @@ unsigned int GeneratePlane(const char* heightmap, unsigned char*& data, GLenum f
 }
 
 void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
 
 	// alpha blend
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -767,6 +770,6 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	
 	
 	model->Draw(modelProgram);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 
 }

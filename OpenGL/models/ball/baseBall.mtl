@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
-# Material Count: 2
+# Material Count: 1
 
-newmtl Scene_-_Root
+newmtl polySurface5SG
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -13,4 +13,4 @@ illum 2
 map_Kd diffuse.png
 map_Bump normal.png
 map_Ka ao.png
-map_Ns roughness.png
+#map_Ns roughness.png

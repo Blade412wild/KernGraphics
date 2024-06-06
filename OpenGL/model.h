@@ -59,6 +59,7 @@ private:
         }
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
+        std::cout << "Dir: " << directory << std::endl;
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
@@ -190,6 +191,7 @@ private:
                 {
                     textures.push_back(textures_loaded[j]);
                     skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                    std::cout << "Loaded Ch]ashed TExture: " << textures_loaded[j].path << std::endl;
                     break;
                 }
             }
@@ -199,6 +201,7 @@ private:
                 texture.id = TextureFromFile(str.C_Str(), this->directory);
                 texture.type = typeName;
                 texture.path = str.C_Str();
+                std::cout << "Loaded TExture: " << texture.path << std::endl;
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
             }
