@@ -28,6 +28,10 @@ GLuint loadTexture(const char* path, int comp = 0);
 void renderSkyBox();
 void renderTerrain();
 void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+glm::vec4 lerp(glm::vec4 a, glm::vec4 b, float t);
+
+void ColorChange(glm::vec4& lightColor);
 
 
 // Util
@@ -47,7 +51,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 // camera 
-glm::vec3 cameraPosition = glm::vec3(0.0f, 200.0f, 3.0f);
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float normalPower = 25.0f;
@@ -59,6 +63,8 @@ float lastY = HEIGHT / 2;
 float yaw = -90.0f;
 float pitch = 0;
 bool firstMouse = true;
+int colorCounter = 0;
+int spaceKePressed = 0;
 
 // World Data
 glm::vec3 lightDirection = glm::normalize(glm::vec3(0, 0.5f, 0.5f));
@@ -88,10 +94,11 @@ int main()
 	GLFWwindow* window;
 	int res = init(window);
 	if (res != 0) return res;
-	 
+
 	stbi_set_flip_vertically_on_load(true);
 
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetKeyCallback(window, keyCallback);
 
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -115,10 +122,10 @@ int main()
 	stbi_set_flip_vertically_on_load(false);
 	fishingRot = new Model("models/fishing/fishingRot.obj");
 	//demonKing = new Model("BigModel/DemonKing.obj");
-	buddha = new Model("BigModel/Budha/Buddha.obj");
+	//buddha = new Model("BigModel/Budha/Buddha.obj");
 	hat = new Model("models/hat/hat.obj");
 	fish = new Model("models/carp/carp.obj");
-	
+
 
 	// Create Viewport
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -149,18 +156,18 @@ int main()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		renderSkyBox();
-		//renderTerrain();
+		renderTerrain();
 
 		float t = glfwGetTime();
 
-		renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0,3,0), glm::vec3(3,3,2.8));
-		renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0,-2.3, 0), glm::vec3(14, 14, 14));
+		renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0, 3, 0), glm::vec3(3, 3, 2.8));
+		//renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0, -2.3, 0), glm::vec3(14, 14, 14));
 		renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
 
 		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
-		
+
 
 		glUseProgram(simpleProgram);
 
@@ -168,9 +175,10 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		glUniform3fv(glGetUniformLocation(simpleProgram, "lightposition"), 1, glm::value_ptr(lightDirection));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
 		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
-		glm::vec4 lightColor = glm::vec4(1, 0, 0, 1);
+		glm::vec4 lightColor;
+		ColorChange(lightColor);
 		glUniform3fv(glGetUniformLocation(simpleProgram, "lightColor"), 1, glm::value_ptr(lightColor));
 
 
@@ -197,6 +205,52 @@ int main()
 	glfwTerminate();
 
 	return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	std::cout << key << std::endl;
+	if (key == GLFW_KEY_SPACE) {
+		switch (action) {
+		case GLFW_PRESS : 
+			colorCounter++;
+			break;
+		case GLFW_REPEAT : 
+			break;
+		case GLFW_RELEASE : 
+			break;
+		}
+	}
+}
+
+
+
+void ColorChange(glm::vec4& lightColor) {
+	glm::vec4 whiteColor = glm::vec4(1, 1, 1, 1);
+	glm::vec4 RedColor = glm::vec4(1, 0, 0, 1);
+	glm::vec4 GreenColor = glm::vec4(0, 1, 0, 1);
+	glm::vec4 BlueColor = glm::vec4(0, 0, 1, 1);
+	glm::vec4 BlackColor = glm::vec4(0, 0, 0, 1);
+	float t = glfwGetTime() / 50;
+
+
+	switch (colorCounter)
+	{
+	case 0: lightColor = whiteColor;
+		break;
+	case 1: lightColor = RedColor;
+		break;
+	case 2: lightColor = GreenColor;
+		break;
+	case 3: lightColor = BlueColor;
+		break;
+	case 4: colorCounter = 0;
+		break;
+	}
+
+}
+
+glm::vec4 lerp(glm::vec4 a, glm::vec4 b, float t) {
+	return a + (b - a) * t;
 }
 void renderSkyBox() {
 	glDisable(GL_CULL_FACE);
@@ -347,12 +401,27 @@ void processInput(GLFWwindow* window, glm::vec3& cameraFront, glm::vec3& cameraP
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
+	else {
+
+	}
 
 	//get cameraSpeed
 	float cameraPower = 2.5f;
 	float cameraSpeed = CalculateCameraSpeed(window, cameraPower);
 
 	glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	//if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && spaceKePressed == 0) {
+	//	std::cout << "pressed" << std::endl;
+	//}
+	//else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_REPEAT) {
+	//	std::cout << "repeat" << std::endl;
+
+	//}
+
+	//else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
+	//	std::cout << "REALSED" << std::endl;
+	//}
 
 	// check move Input program
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -754,7 +823,7 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
 	// double multiply blend
-	
+
 	glEnable(GL_DEPTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -770,14 +839,14 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
 	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	
+
 	glUniform3fv(glGetUniformLocation(modelProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
 	glUniform3fv(glGetUniformLocation(modelProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
-	
 
 
-	
-	
+
+
+
 	model->Draw(modelProgram);
 	glDisable(GL_BLEND);
 
