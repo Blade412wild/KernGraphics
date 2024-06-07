@@ -149,7 +149,7 @@ int main()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		renderSkyBox();
-		renderTerrain();
+		//renderTerrain();
 
 		float t = glfwGetTime();
 
@@ -170,6 +170,9 @@ int main()
 
 		glUniform3fv(glGetUniformLocation(simpleProgram, "lightposition"), 1, glm::value_ptr(lightDirection));
 		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
+		glm::vec4 lightColor = glm::vec4(1, 0, 0, 1);
+		glUniform3fv(glGetUniformLocation(simpleProgram, "lightColor"), 1, glm::value_ptr(lightColor));
+
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, boxTex);

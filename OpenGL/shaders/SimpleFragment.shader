@@ -11,6 +11,7 @@ uniform sampler2D normalTex;
 
 uniform vec3 lightPosition;
 uniform vec3 cameraPosition;
+uniform vec3 lightColor;
 
 
 void main() {
@@ -37,6 +38,7 @@ void main() {
 	//seperate RGB and Aplha calculations
 	vec4 output = vec4(color, 1.0f) * texture(mainTex, uv);
 	output.rgb = output.rgb * min(lightValue + 0.1, 1.0) + specular;
+	output.rgb *= lightColor.rgb;
 
 	FragColor = output;
 }
