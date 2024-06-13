@@ -54,7 +54,7 @@ void main()
     float fog = pow(clamp((dist - 250) / 1000, 0, 1), 2);
     vec3 fogColor = lerp(botColor, topColor, max(viewDir.y, 0.0));
 
-    vec4 output = lerp(diffuse * max(light * ambientOcclusion, 0.2 * ambientOcclusion) + vec4(specular, 0), vec4(fogColor, 1.0), fog);
+    vec4 output = lerp(diffuse * max(light * ambientOcclusion, 0.5 * ambientOcclusion) + vec4(specular, 0), vec4(fogColor, 1.0), fog);
    
     //if (output.a < 0.5) discard;
     

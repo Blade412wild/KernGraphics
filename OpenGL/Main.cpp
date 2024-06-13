@@ -108,8 +108,12 @@ int main()
 
 	terrainVAO = GeneratePlane("textures/Heightmap.png", heightmapTexture, GL_RGBA, 4, 250.0f, 5.0f, terrainIndexCount, heightmapID);
 	heightNormalID = loadTexture("textures/heightnormal.png");
+
 	GLuint boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
+
+	glUniform1i(glGetUniformLocation(simpleProgram, "diffuseTex"), boxTex);
+	glUniform1i(glGetUniformLocation(simpleProgram, "normalTex"), boxNormal);
 
 	dirt = loadTexture("textures/dirt.jpg");
 	sand = loadTexture("textures/sand.jpg");
@@ -166,9 +170,6 @@ int main()
 		renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
 
-		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
-
-
 		glUseProgram(simpleProgram);
 
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
@@ -176,7 +177,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glUniform3fv(glGetUniformLocation(simpleProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
-		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraposition"), 1, glm::value_ptr(cameraPosition));
+		glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 		glm::vec4 lightColor;
 		ColorChange(lightColor);
 		glUniform3fv(glGetUniformLocation(simpleProgram, "lightColor"), 1, glm::value_ptr(lightColor));
@@ -193,6 +194,7 @@ int main()
 		glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
 
 
+		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
 		glfwSwapBuffers(window);
 
 		//evemts pollen
@@ -296,7 +298,7 @@ void renderTerrain() {
 	glUniformMatrix4fv(glGetUniformLocation(terrainProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	float t = glfwGetTime();
-	//lightDirection = glm::normalize(glm::vec3(glm::sin(t), 0.5, glm::cos(t)));
+	lightDirection = glm::normalize(glm::vec3(glm::sin(t), 0.5, glm::cos(t)));
 
 	glUniform3fv(glGetUniformLocation(terrainProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
 	glUniform3fv(glGetUniformLocation(terrainProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
@@ -513,7 +515,7 @@ void CreateGeometry(GLuint& vao, GLuint& EBO, int& size, int& numbIndices) {
 
 	int stride = (3 + 3 + 2 + 3 + 3 + 3) * sizeof(float);
 	size = sizeof(vertices) / stride;
-	numbIndices = sizeof(indices) / sizeof(int);
+	numbIndices = sizeof(indices) / sizeof(unsigned int);
 
 	// create te VAO
 	glGenVertexArrays(1, &vao);

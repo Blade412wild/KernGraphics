@@ -25,4 +25,5 @@ void main() {
 	tbn = mat3(t, b, n);
 
 	worldPosition = world * vec4(aPos, 1.0);
+
 }
