@@ -11,7 +11,7 @@ out vec3 color;
 out vec2 uv;
 out mat3 tbn;
 out vec4 worldPosition;
-
+out vec3 normal;
 uniform mat4 world, view, projection;
 
 void main() { 
@@ -23,6 +23,7 @@ void main() {
 	vec3 b = normalize(mat3(world) * vBitangent);
 	vec3 n = normalize(mat3(world) * vNormal);
 	tbn = mat3(t, b, n);
+	normal = vNormal;
 
 	worldPosition = world * vec4(aPos, 1.0);
 
