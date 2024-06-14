@@ -141,6 +141,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\lightingFragment.shader" />
+    <None Include="shaders\lightingVertex.shader" />
     <None Include="shaders\modelFragment.shader" />
     <None Include="shaders\modelVertex.shader" />
     <None Include="shaders\SimpleFragment.shader" />

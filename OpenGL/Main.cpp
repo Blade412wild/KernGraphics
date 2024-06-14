@@ -29,6 +29,8 @@ void renderSkyBox();
 void renderTerrain();
 void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+float CalculateAttenuation(float constant, float linear, float quadratic, float distance);
+void CreateLight();
 glm::vec4 lerp(glm::vec4 a, glm::vec4 b, float t);
 
 void ColorChange(glm::vec4& lightColor);
@@ -42,6 +44,7 @@ GLuint simpleProgram;
 GLuint skyProgram;
 GLuint terrainProgram;
 GLuint modelProgram;
+GLuint lightingProgram;
 
 const int WIDTH = 1280;
 const int HEIGHT = 720;
@@ -87,6 +90,9 @@ Model* fishingRot;
 Model* hat;
 Model* fish;
 
+//light
+GLuint boxTex;
+
 int main()
 {
 
@@ -109,7 +115,7 @@ int main()
 	terrainVAO = GeneratePlane("textures/Heightmap.png", heightmapTexture, GL_RGBA, 4, 250.0f, 5.0f, terrainIndexCount, heightmapID);
 	heightNormalID = loadTexture("textures/heightnormal.png");
 
-	GLuint boxTex = loadTexture("textures/container2.png");
+	boxTex = loadTexture("textures/container2.png");
 	GLuint boxNormal = loadTexture("textures/container2_normal.png");
 
 	glUniform1i(glGetUniformLocation(simpleProgram, "diffuseTex"), boxTex);
@@ -161,6 +167,7 @@ int main()
 
 		renderSkyBox();
 		renderTerrain();
+		CreateLight();
 
 		float t = glfwGetTime();
 
@@ -213,18 +220,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	std::cout << key << std::endl;
 	if (key == GLFW_KEY_SPACE) {
 		switch (action) {
-		case GLFW_PRESS : 
+		case GLFW_PRESS:
 			colorCounter++;
 			break;
-		case GLFW_REPEAT : 
+		case GLFW_REPEAT:
 			break;
-		case GLFW_RELEASE : 
+		case GLFW_RELEASE:
 			break;
 		}
 	}
 }
-
-
 
 void ColorChange(glm::vec4& lightColor) {
 	glm::vec4 whiteColor = glm::vec4(1, 1, 1, 1);
@@ -582,6 +587,10 @@ void createShaders() {
 	glUniform1i(glGetUniformLocation(modelProgram, "texture_normal1"), 2);
 	glUniform1i(glGetUniformLocation(modelProgram, "texture_roughness1"), 3);
 	glUniform1i(glGetUniformLocation(modelProgram, "texture_ao1"), 4);
+
+	createProgram(lightingProgram, "shaders/lightingVertex.shader", "shaders/lightingFragment.shader");
+	glUseProgram(lightingProgram);
+	glUniform1i(glGetUniformLocation(lightingProgram, "diffuseTex"), boxTex);
 }
 
 
@@ -851,5 +860,41 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 
 	model->Draw(modelProgram);
 	glDisable(GL_BLEND);
+
+}
+
+void CreateLight() {
+	glUseProgram(lightingProgram);
+
+	glm::mat4 world = glm::mat4(1.0f);
+	//world = glm::translate(world, pos);
+	//world = world * glm::mat4_cast(glm::quat(rot));
+	//world = glm::scale(world, scale);
+
+	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+	glm::vec3 ambient(0.2f, 0.2f, 0.2f);
+	glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
+	glm::vec3 specular(1.0f, 1.0f, 1.0f);
+
+	GLfloat constant = 1.0f;
+	GLfloat linear = 0.09f;
+	GLfloat quadratic = 0.032f;
+
+
+	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	glUniform3fv(glGetUniformLocation(lightingProgram, "light.position"), 1, glm::value_ptr(lightPos));
+	glUniform3fv(glGetUniformLocation(lightingProgram, "viewPos"), 1, glm::value_ptr(cameraPosition));
+
+	glUniform3fv(glGetUniformLocation(lightingProgram, "light.ambient"), 1, glm::value_ptr(ambient));
+	glUniform3fv(glGetUniformLocation(lightingProgram, "light.diffuse"), 1, glm::value_ptr(diffuse));
+	glUniform3fv(glGetUniformLocation(lightingProgram, "light.specular"), 1, glm::value_ptr(specular));
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.constant"), constant);
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.linear"), linear);
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.quadratic"), quadratic);
+
 
 }
