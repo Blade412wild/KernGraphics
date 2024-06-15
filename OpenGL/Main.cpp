@@ -54,7 +54,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 // camera 
-glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float normalPower = 5.0f;
@@ -129,12 +129,12 @@ int main()
 
 	backPack = new Model("models/backpack/backpack.obj");
 
-	stbi_set_flip_vertically_on_load(false);
-	fishingRot = new Model("models/fishing/fishingRot.obj");
+	//stbi_set_flip_vertically_on_load(false);
+	//fishingRot = new Model("models/fishing/fishingRot.obj");
 	//demonKing = new Model("BigModel/DemonKing.obj");
 	//buddha = new Model("BigModel/Budha/Buddha.obj");
-	hat = new Model("models/hat/hat.obj");
-	fish = new Model("models/carp/carp.obj");
+	//hat = new Model("models/hat/hat.obj");
+	//fish = new Model("models/carp/carp.obj");
 
 
 	// Create Viewport
@@ -149,7 +149,7 @@ int main()
 	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 
 	//matrices!
-	projection = glm::perspective(glm::radians(45.0f), WIDTH / (float)HEIGHT, 0.1f, 5000.0f);
+	projection = glm::perspective(glm::radians(75.0f), WIDTH / (float)HEIGHT, 0.1f, 5000.0f);
 
 
 	// Game render loop
@@ -173,9 +173,9 @@ int main()
 
 		renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0, 3, 0), glm::vec3(3, 3, 2.8));
 		//renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0, -2.3, 0), glm::vec3(14, 14, 14));
-		renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
-		renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
+		//renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0, -2.3, 0), glm::vec3(14, 14, 14));
+		//renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
+		//renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
 
 		//glUseProgram(simpleProgram);
 
@@ -217,7 +217,7 @@ int main()
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	std::cout << key << std::endl;
+	//std::cout << key << std::endl;
 	if (key == GLFW_KEY_SPACE) {
 		switch (action) {
 		case GLFW_PRESS:
@@ -864,22 +864,26 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 }
 
 void CreateLight(GLuint& boxTex) {
+
 	glUseProgram(lightingProgram);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	//world = glm::translate(world, pos);
 	//world = world * glm::mat4_cast(glm::quat(rot));
-	//world = glm::scale(world, scale);
+	model = glm::scale(model, glm::vec3(10, 10, 10));
 
 	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-	glm::vec3 ambient(0.2f, 0.2f, 0.2f);
-	glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
+	glm::vec3 ambient(0.1f, 0.1f, 0.1f);
+	glm::vec3 diffuse(0.8f, 0.8f, 0.8f);
 	glm::vec3 specular(1.0f, 1.0f, 1.0f);
 
 	GLfloat constant = 1.0f;
-	GLfloat linear = 0.22f;
-	GLfloat quadratic = 0.20f;
+	GLfloat linear = 0.09f;
+	GLfloat quadratic = 0.32f;
+	GLfloat cutOff = glm::cos(glm::radians(12.5f));
+	GLfloat outerCutOff = glm::cos(glm::radians(17.5f));
+	//std::cout << "(" << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << std::endl;
 
 
 	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -887,6 +891,10 @@ void CreateLight(GLuint& boxTex) {
 	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	glUniform3fv(glGetUniformLocation(lightingProgram, "light.position"), 1, glm::value_ptr(cameraPosition));
+	glUniform3fv(glGetUniformLocation(lightingProgram, "light.direction"), 1, glm::value_ptr(cameraFront));
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.cutOff"), cutOff);
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.cutOff"), outerCutOff);
+
 	glUniform3fv(glGetUniformLocation(lightingProgram, "viewPos"), 1, glm::value_ptr(cameraPosition));
 
 	glUniform3fv(glGetUniformLocation(lightingProgram, "light.ambient"), 1, glm::value_ptr(ambient));
@@ -904,4 +912,5 @@ void CreateLight(GLuint& boxTex) {
 	glBindVertexArray(boxVAO);
 	//glDrawArrays(GL_TRIANGLES, 0, triangleSize);
 	glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+
 }
