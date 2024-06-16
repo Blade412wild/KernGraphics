@@ -149,7 +149,7 @@ int main()
 	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 
 	//matrices!
-	projection = glm::perspective(glm::radians(75.0f), WIDTH / (float)HEIGHT, 0.1f, 5000.0f);
+	projection = glm::perspective(glm::radians(35.0f), WIDTH / (float)HEIGHT, 0.1f, 5000.0f);
 
 
 	// Game render loop
@@ -162,16 +162,18 @@ int main()
 
 		//rendering
 		glClearColor(0.2, 0.3, 0.3, 1.0); //beautiful green
+		//glClearColor(0, 0, 0, 1.0); //beautiful green
+
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		//renderSkyBox();
-		//renderTerrain();
+		renderSkyBox();
+		renderTerrain();
 		CreateLight(boxTex);
 
 		float t = glfwGetTime();
 
-		renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0, 3, 0), glm::vec3(3, 3, 2.8));
+		//renderModel(backPack, glm::vec3(1, 76, -8), glm::vec3(0, 3, 0), glm::vec3(3, 3, 2.8));
 		//renderModel(buddha, glm::vec3(0, 60, 0), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		//renderModel(hat, glm::vec3(5, 86, -5), glm::vec3(0, -2.3, 0), glm::vec3(14, 14, 14));
 		//renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
@@ -864,13 +866,15 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 }
 
 void CreateLight(GLuint& boxTex) {
-
-	glUseProgram(lightingProgram);
+	glEnable(GL_DEPTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	//world = glm::translate(world, pos);
 	//world = world * glm::mat4_cast(glm::quat(rot));
-	model = glm::scale(model, glm::vec3(10, 10, 10));
+	//model = glm::scale(model, glm::vec3(10, 10, 10));
 
 	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -878,13 +882,15 @@ void CreateLight(GLuint& boxTex) {
 	glm::vec3 diffuse(0.8f, 0.8f, 0.8f);
 	glm::vec3 specular(1.0f, 1.0f, 1.0f);
 
-	GLfloat constant = 1.0f;
-	GLfloat linear = 0.09f;
-	GLfloat quadratic = 0.32f;
-	GLfloat cutOff = glm::cos(glm::radians(12.5f));
-	GLfloat outerCutOff = glm::cos(glm::radians(17.5f));
-	//std::cout << "(" << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << std::endl;
+	float constant = 1.0f;
+	float linear = 0.9f;
+	float quadratic = 0.22f;
+	float cutOff = glm::cos(glm::radians(12.5f));
+	float outerCutOff = glm::cos(glm::radians(17.5f));
 
+	std::cout << "(" << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << std::endl;
+
+	glUseProgram(lightingProgram);
 
 	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(lightingProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -893,7 +899,7 @@ void CreateLight(GLuint& boxTex) {
 	glUniform3fv(glGetUniformLocation(lightingProgram, "light.position"), 1, glm::value_ptr(cameraPosition));
 	glUniform3fv(glGetUniformLocation(lightingProgram, "light.direction"), 1, glm::value_ptr(cameraFront));
 	glUniform1f(glGetUniformLocation(lightingProgram, "light.cutOff"), cutOff);
-	glUniform1f(glGetUniformLocation(lightingProgram, "light.cutOff"), outerCutOff);
+	glUniform1f(glGetUniformLocation(lightingProgram, "light.outerCutOff"), outerCutOff);
 
 	glUniform3fv(glGetUniformLocation(lightingProgram, "viewPos"), 1, glm::value_ptr(cameraPosition));
 
