@@ -31,6 +31,7 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 float CalculateAttenuation(float constant, float linear, float quadratic, float distance);
 void CreateLight(GLuint& boxTex);
+void CreateCube(GLuint& boxTex);
 glm::vec4 lerp(glm::vec4 a, glm::vec4 b, float t);
 
 void ColorChange(glm::vec4& lightColor);
@@ -167,8 +168,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		renderSkyBox();
-		renderTerrain();
+		//renderSkyBox();
+		//renderTerrain();
 		CreateLight(boxTex);
 
 		float t = glfwGetTime();
@@ -179,28 +180,7 @@ int main()
 		//renderModel(fishingRot, glm::vec3(0, 75, 5), glm::vec3(0, 0, 0), glm::vec3(10, 10, 10));
 		//renderModel(fish, glm::vec3(0, 76, 14), glm::vec3(-1.1, 0, 0), glm::vec3(20, 20, 20));
 
-		//glUseProgram(simpleProgram);
-
-		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		//glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-		//glUniform3fv(glGetUniformLocation(simpleProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
-		//glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
-		//glm::vec4 lightColor;
-		//ColorChange(lightColor);
-		//glUniform3fv(glGetUniformLocation(simpleProgram, "lightColor"), 1, glm::value_ptr(lightColor));
-
-
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, boxTex);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE1, boxNormal);
-
-
-		//glBindVertexArray(boxVAO);
-		////glDrawArrays(GL_TRIANGLES, 0, triangleSize);
-		//glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+		//CreateCube(boxTex);
 
 
 		//renderModel(demonKing, glm::vec3(1000, 410, 1400), glm::vec3(0, -1, 0), glm::vec3(50, 50, 50));
@@ -856,10 +836,6 @@ void renderModel(Model* model, glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) {
 	glUniform3fv(glGetUniformLocation(modelProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
 	glUniform3fv(glGetUniformLocation(modelProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
-
-
-
-
 	model->Draw(modelProgram);
 	glDisable(GL_BLEND);
 
@@ -872,11 +848,6 @@ void CreateLight(GLuint& boxTex) {
 	glCullFace(GL_BACK);
 
 	glm::mat4 model = glm::mat4(1.0f);
-	//world = glm::translate(world, pos);
-	//world = world * glm::mat4_cast(glm::quat(rot));
-	//model = glm::scale(model, glm::vec3(10, 10, 10));
-
-	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 	glm::vec3 ambient(0.1f, 0.1f, 0.1f);
 	glm::vec3 diffuse(0.8f, 0.8f, 0.8f);
@@ -888,7 +859,7 @@ void CreateLight(GLuint& boxTex) {
 	float cutOff = glm::cos(glm::radians(12.5f));
 	float outerCutOff = glm::cos(glm::radians(17.5f));
 
-	std::cout << "(" << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << std::endl;
+	//std::cout << "(" << cameraFront.x << ", " << cameraFront.y << ", " << cameraFront.z << std::endl;
 
 	glUseProgram(lightingProgram);
 
@@ -914,6 +885,37 @@ void CreateLight(GLuint& boxTex) {
 	glBindTexture(GL_TEXTURE_2D, boxTex);
 	/*glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE1, boxNormal);*/
+
+	glBindVertexArray(boxVAO);
+	//glDrawArrays(GL_TRIANGLES, 0, triangleSize);
+	glDrawElements(GL_TRIANGLES, boxIndexCount, GL_UNSIGNED_INT, 0);
+
+}
+
+void CreateCube(GLuint& boxTex) {
+	glEnable(GL_DEPTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glUseProgram(simpleProgram);
+
+	glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "world"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+	glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(simpleProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	glUniform3fv(glGetUniformLocation(simpleProgram, "lightDirection"), 1, glm::value_ptr(lightDirection));
+	glUniform3fv(glGetUniformLocation(simpleProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+	glm::vec4 lightColor;
+	ColorChange(lightColor);
+	glUniform3fv(glGetUniformLocation(simpleProgram, "lightColor"), 1, glm::value_ptr(lightColor));
+
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, boxTex);
+	glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE1, boxNormal);
+
 
 	glBindVertexArray(boxVAO);
 	//glDrawArrays(GL_TRIANGLES, 0, triangleSize);
